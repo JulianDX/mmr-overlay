@@ -234,7 +234,7 @@ export default function Home() {
               }`}
             >
               <div className="stat-display">
-                <div className="stat-label" data-text="12P">
+                <div className="stat-label" data-text="Rank">
                   Rank
                 </div>
                 <div
