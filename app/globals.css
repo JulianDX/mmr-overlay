@@ -1,26 +1,615 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Font face for Avenir Black */
+@font-face {
+  font-family: 'RacersDelight';
+  src: url('/assets/fonts/RacersDelight.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'RacersDelight', sans-serif;
+  background-color: #292929;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Root app */
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Player card (overlay container) */
+.player-card {
+  background-color: #232323c9;
+  border-radius: 60px;
+  padding: 40px 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  min-width: 980px;
+}
+
+.player-card .bg-layer {
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/f52uogl3sq5z.jpg");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.01;
+  z-index: 1;
+  pointer-events: none;
+  background-size: 170%;
+}
+
+.player-card>*:not(.bg-layer) {
+  position: relative;
+  z-index: 11;
+}
+
+.player-card-scale {
+  transform-origin: center;
+}
+
+@media (max-width: 1200px) {
+
+  .player-card,
+  .loading {
+    transform-origin: center;
+  }
+}
+
+/* Animated shine effect on border */
+.player-card::before {
+  content: "";
+  position: absolute;
+
+  /* separación real del borde */
+  inset: 6px;
+
+  border-radius: 54px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #6e6e6edf,
+      #6e6e6edf,
+      #6e6e6edf,
+      #6e6e6edf,
+      #6e6e6edf
+    );
+
+  background-size: 200% 100%;
+  animation: borderShine 6s ease-in-out infinite;
+
+  pointer-events: none;
+  z-index: 9;
+
+  /* crea grosor del marco */
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  padding: 8px;
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+.overlay-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.mode-badge {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+
+  font-family: 'RacersDelight', sans-serif;
+  font-size: 55px;
+  font-weight: 900;
+  letter-spacing: 4px;
+
+  color: white;
+
+  text-shadow:
+    0 0 6px rgba(160, 160, 160, 0.75),
+    0 0 12px rgba(150, 150, 150, 0.5),
+    3px 3px 10px rgba(0,0,0,.9);
+
+  line-height: 1;
+}
+
+/* Animated shine effect on content */
+.player-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 65%);
+  transform: translateX(-150%) skewX(-20deg);
+  animation: speedSweep 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 6;
+}
+
+@keyframes speedSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(150%) skewX(-20deg);
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Rank icon */
+.rank-icon {
+  width: 105px;
+  height: 105px;
+  object-fit: contain;
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.792));
+  flex-shrink: 0;
+  margin-right: 20px;
+  position: relative;
+  z-index: 11;
+}
+
+.rank-platinum {
+  filter:
+    drop-shadow(0 0 3px rgba(0, 84, 102, 1)) drop-shadow(0 0 7px rgba(0, 84, 102, 0.95)) drop-shadow(0 0 12px rgba(0, 84, 102, 0.8));
+}
+
+.rank-ruby {
+  filter:
+    drop-shadow(0 0 3px rgba(213, 28, 94, 1)) drop-shadow(0 0 7px rgba(213, 28, 94, 0.95)) drop-shadow(0 0 12px rgba(213, 28, 94, 0.8));
+}
+
+.rank-sapphire {
+  filter:
+    drop-shadow(0 0 3px rgba(40, 108, 211, 1)) drop-shadow(0 0 7px rgba(40, 108, 211, 0.95)) drop-shadow(0 0 12px rgba(40, 108, 211, 0.8));
+}
+
+.rank-diamond {
+  filter:
+    drop-shadow(0 0 3px rgba(0, 172, 208, 1)) drop-shadow(0 0 7px rgba(0, 172, 208, 0.95)) drop-shadow(0 0 12px rgba(0, 172, 208, 0.8));
+}
+
+.rank-master {
+  filter:
+    drop-shadow(0 0 3px rgba(207, 226, 243, 1)) drop-shadow(0 0 7px rgba(207, 226, 243, 0.95)) drop-shadow(0 0 12px rgba(207, 226, 243, 0.85));
+}
+
+/* Wrapper con tamaño fijo - ahora con posición relativa para superposición */
+.player-info-wrapper {
+  flex: 1;
+  height: 105px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* Container para las transiciones */
+.player-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  position: absolute;
+  z-index: 11;
+}
+
+/* Contenido estático - sin animación */
+.player-info-static {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Animación de salida - sube y desaparece */
+.player-info-container.slide-out {
+  animation: slideOutToTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutToTop {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Animación de entrada - viene desde abajo */
+.player-info-container.slide-in {
+  animation: slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Player info container */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-right: 30px;
+  margin-top: -5px;
+}
+
+/* Player name - SOLUCIÓN CON GRADIENTE Y SOMBRA */
+.player-name {
+  font-size: 85px;
+  padding-left: 11px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  font-family: 'RacersDelight', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+
+  /* Gradiente en el texto principal */
+  background: white;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra detrás del texto */
+.player-name::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+/* País flag */
+.country-flag {
+  margin-left: 10px;
+  margin-top: 10px;
+  width: 101px;
+  height: 81px;
+  border-radius: 12px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+/* MMR number - para el modo default */
+.stat-label {
+  font-size: 85px;
+  font-weight: 900;
+  padding-left: 10px;
+  letter-spacing: 3px;
+  font-family: 'RacersDelight', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+
+  /* Gradiente amarillo */
+  background: linear-gradient(to bottom,
+      #FCDE03 0%,
+      #FCDE03 55%,
+      #fcca03 65%,
+      #fcca03 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra para stat-label */
+.stat-label::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+/* TÉCNICA para positive/negative */
+.positive,
+.negative {
+  position: relative;
+  display: inline-block;
+}
+
+/* Sombra para positive/negative */
+.positive::after,
+.negative::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+.positive {
+  background: linear-gradient(to bottom,
+      #16d639 0%,
+      #16d639 45%,
+      #11cb33 55%,
+      #11cb33 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.negative {
+  background: linear-gradient(to bottom,
+      #f87171 0%,
+      #f87171 45%,
+      #ef4444 55%,
+      #ef4444 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Contenedor para estadísticas alternativas */
+.stat-display,
+.stat-display-lm {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Versión más pequeña para Last Match */
+.stat-label-lm {
+  font-size: 80px;
+  font-weight: 900;
+  padding-left: 10px;
+  letter-spacing: 3px;
+  font-family: 'RacersDelight', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+
+  /* Gradiente amarillo */
+  background: linear-gradient(to bottom,
+      #FCDE03 0%,
+      #FCDE03 55%,
+      #fcca03 65%,
+      #fcca03 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra para stat-label-lm */
+.stat-label-lm::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+/* Stat value normal */
+.stat-value {
+  font-size: 85px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  font-family: 'RacersDelight', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+
+  /* Gradiente blanco */
+  background: white;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra para stat-value */
+.stat-value::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+/* Stat value para Last Match */
+.stat-value-lm {
+  font-size: 80px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  font-family: 'RacersDelight', sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+
+  /* Gradiente blanco por defecto */
+  background: linear-gradient(to bottom,
+      #ffffff 0%,
+      #ffffff 45%,
+      #e6e6e6 55%,
+      #e6e6e6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Sombra para stat-value-lm */
+.stat-value-lm::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  text-shadow: 4px 4px 10px rgba(25, 25, 25, 0.829);
+}
+
+/* Para stat-value-lm con positive/negative */
+.stat-value-lm.positive,
+.stat-value-lm.negative {
+  position: relative;
+}
+
+/* Loading / error states */
+.loading,
+.error-message {
+  background-color: #333333d3;
+  border-radius: 80px;
+  padding: 30px 40px;
+  align-items: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 4px rgba(77, 77, 77, 0.7),
+    inset 0 0 0 3px #3e3e3e;
+  min-width: 1000px;
+  color: white;
+  font-size: 85px;
+  text-align: center;
+}
+
+/* Cache invisible de imágenes */
+.image-cache {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.image-cache img {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+/* Container para las transiciones */
+.player-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  position: absolute;
+  z-index: 11;
+}
+
+/* Estados de visibilidad */
+.player-info-container.hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.player-info-container.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Animación de salida - sube y desaparece */
+.player-info-container.slide-out {
+  animation: slideOutToTop 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutToTop {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Animación de entrada - viene desde abajo */
+.player-info-container.slide-in {
+  animation: slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
