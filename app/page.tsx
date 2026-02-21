@@ -116,7 +116,10 @@ export default function Home() {
         ? `+${data.lastDiff}`
         : data.lastDiff;
 
-  const avgText = data.averageScore ?? "0";
+  const avgText =
+    data.averageScore !== undefined && data.averageScore !== null
+      ? data.averageScore.toFixed(1)
+      : "0.0";
 
   const rankClass = `rank-${data.rank.toLowerCase().replace(" ", "")}`;
 
