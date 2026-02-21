@@ -41,7 +41,7 @@ export default function Home() {
         const json: PlayerResponse = await res.json();
         setData(json);
       } catch {
-        setError("Could not load player data");
+        setError("Player not found");
       } finally {
         setLoading(false);
       }
