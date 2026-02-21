@@ -526,7 +526,7 @@ body {
 .loading,
 .error-message {
   background-color: #333333d3;
-  border-radius: 80px;
+  border-radius: 60px;
   padding: 30px 40px;
   align-items: center;
   position: relative;
